@@ -10,7 +10,13 @@ class FavoriteController {
     if(cached) {
       return res.json(cached);
     }
-    const favorites = await favorite.findAllFavorites();
+    const favorites = await favorite.findAllFavorites()
+      .catch(err => {
+        if (err.status) {
+          return res.status(err.status).json();
+        }
+        return res.status(400).json({ message: 'bad request' });
+      });
     cache.setData('favorites', {...favorites}, 60*10);
     return res.json(favorites);
   }
@@ -27,15 +33,25 @@ class FavoriteController {
     nota = nota ? nota : 0;
     
     if (typeof user_id === 'string') { 
-      await favorite.create(Number(user_id), Number(app_id), Number(nota))
-        .catch(err => {
-          if(err.code === 500){
-            return res.status(500).json({ message: 'internal server error' });
-          }
-          return res.status(400).json({ message: 'bad request' });
-        })
+      try {
+        const newFavorite = await favorite.create(Number(user_id), Number(app_id), Number(nota));
+        if (!newFavorite) {
+          return res.status(404).json({ message: 'app not found' });
+        }
+        const cached = await cache.getData('favorites');
+        if(cached) {
+          cache.deleteData('favorites');
+        }
+        return res.status(200).json(newFavorite);
+      } catch (err) {
+        if (err.status && err.status !== 400) {
+          return res.status(err.status).json();
+        }
+        return res.status(400).json({ message: 'bad request' });
+      }
+      
     }
-    return res.status(201).json();
+    return res.status(400).json({ message: 'bad request' });
   }
 
   async delete(req: Request, res: Response) {
@@ -45,15 +61,17 @@ class FavoriteController {
       return res.status(400).json({ message: 'bad request' });
     }
 
-    
     if (typeof user_id === 'string') { 
-      await favorite.delete(Number(user_id), Number(appid))
+      const favoriteDeleted = await favorite.delete(Number(user_id), Number(appid))
         .catch(err => {
-          if(err.code === 500){
-            return res.status(500).json({ message: 'internal server error' });
+          if (err.status) {
+            return res.status(err.status).json();
           }
           return res.status(400).json({ message: 'bad request' });
-        })
+        });
+      if(!favoriteDeleted) {
+        return res.status(404).json({ message: 'not found'});
+      }
     }
     const cached = await cache.getData('favorites');
     if(cached) {

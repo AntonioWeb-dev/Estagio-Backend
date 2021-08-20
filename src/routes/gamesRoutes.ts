@@ -15,11 +15,15 @@ router.get('/', async (req: Request, res: Response) => {
   if(cached) {
     return res.json(cached);
   }
-
-  const data = await axios.get(' https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json');
-  const appList = data.data.applist['apps'].map((app: games) => app);
-
-  cache.setData('allApps', {...appList}, 60*10);
+  let appList: games[];
+  try {
+    const data = await axios.get(' https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json');
+    appList = data.data.applist['apps'].map((app: games) => app);
+  
+    cache.setData('allApps', {...appList}, 60*10);
+  } catch (err) {
+    return res.status(err.status);
+  }
   return res.json(appList);
 });
 
@@ -32,6 +36,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 
   const app = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${id}`)
   .then(response => {
+    if(response.status !== 200 || !response.data[`${id}`].success) {
+      return res.status(404).json({ message: 'not found' });
+    }
     const app = response.data;
     return app[id];
   })
@@ -40,10 +47,6 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'bad request' });
     }
   });
-
-  if(!app.data) {
-    return res.status(404).json({ message: 'not found' });
-  }
 
   cache.setData(id, app.data, 60*10);
   return res.json(app.data);
