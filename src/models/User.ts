@@ -6,8 +6,9 @@ class User {
     return users;
   }
   async create(name: string) {
-    await knex('users').insert({name: name});
-    return true;
+    const id = await knex('users').insert({name: name});
+    const user = await knex('users').where('id', id);
+    return user[0];
   }
 }
 

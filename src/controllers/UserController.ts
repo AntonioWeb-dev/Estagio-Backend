@@ -9,14 +9,14 @@ class UserController {
   }
   async create(req: Request, res: Response): Promise<any> {
     const { name } = req.body;
-    await user.create(name)
+    const newUser = await user.create(name)
       .catch(err => {
         if(err.code === 500){
           return res.status(500).json({ message: 'internal server error' });
         }
         return res.status(400).json({ message: 'bad request' });
       })
-    return res.status(201).json();
+    return res.status(200).json(newUser);
   }
 }
 

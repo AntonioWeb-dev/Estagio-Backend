@@ -20,6 +20,11 @@ class Favorite {
       return false;
     }
 
+    const user = await knex('users').where('id', user_id);
+    if(!user[0]) {
+      return false;
+    }
+
     const favorite_id = await knex('favorites').insert({user_id: user_id, app_id: app_id, nota: nota});
     const favorite = await knex('favorites').where('favorite_id', favorite_id[0]);
     return favorite[0];
