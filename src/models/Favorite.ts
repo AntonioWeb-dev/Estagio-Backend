@@ -24,15 +24,18 @@ class Favorite {
     if(!user[0]) {
       return false;
     }
-
+    const alreadyExists = await knex('favorites').where('app_id', app_id).andWhere('user_id', user_id);
+    if(alreadyExists[0]) {
+      return false;
+    }
     const favorite_id = await knex('favorites').insert({user_id: user_id, app_id: app_id, nota: nota});
     const favorite = await knex('favorites').where('favorite_id', favorite_id[0]);
     return favorite[0];
   }
 
   async delete(user_id: number, app_id: number) {
-    const favorite = await knex('favorites').where('app_id', app_id);
-    if (favorite.length === 0) {
+    const favorite = await knex('favorites').del().where({user_id: user_id, app_id: app_id});
+    if (!favorite) {
       return false;
     }
     return true;
