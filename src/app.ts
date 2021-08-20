@@ -5,6 +5,7 @@ dotenv.config();
 
 // Routes
 import gamesRouter from './routes/gamesRoutes';
+import userRouter from './routes/userRouter';
 
 class App {
   public app: express.Application;
@@ -20,6 +21,7 @@ class App {
   }
 
   routes() {
+    this.app.use(userRouter);
     this.app.use(gamesRouter);
   }
 }
