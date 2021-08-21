@@ -7,7 +7,7 @@ class UserController {
     const users = await user.findAllUsers();
     return res.json(users);
   }
-  async create(req: Request, res: Response): Promise<any> {
+  async create(req: Request, res: Response) {
     const { name } = req.body;
     const newUser = await user.create(name)
       .catch(err => {

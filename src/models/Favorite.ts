@@ -2,8 +2,8 @@ import axios from 'axios';
 import knex from '../database';
 
 class Favorite {
-  async findAllFavorites() {      
-    const favorites = await knex('favorites').orderBy('favorite_id');
+  async findAllFavorites(user_id: string) {      
+    const favorites = await knex('favorites').where('user_id', user_id).orderBy('favorite_id');
     const apps = favorites.map((favorite) => {
       return axios.get(`https://store.steampowered.com/api/appdetails?appids=${favorite.app_id}`)
         .then(result => {

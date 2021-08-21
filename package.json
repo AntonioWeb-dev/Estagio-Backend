@@ -4,6 +4,7 @@
   "description": "Este é um projeto para seleção de estágio da App Master, onde os participantes devem desenvolver uma aplicação FrontEnd React ou Backend Nodejs.",
   "main": "index.js",
   "scripts": {
+    "build": "npx tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx ts-node-dev src/server.ts"

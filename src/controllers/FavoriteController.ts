@@ -6,17 +6,23 @@ import cache from '../cache';
 class FavoriteController {
 
   async index(req: Request, res: Response) {
+    const { user_id }  = req.headers;
     const cached = await cache.getData('favorites');
     if(cached) {
       return res.json(cached);
     }
-    const favorites = await favorite.findAllFavorites()
+    if (typeof user_id !== 'string') {
+      console.log('ola');
+      return res.status(400).json({ message: 'bad request' });
+    }
+    const favorites = await favorite.findAllFavorites(user_id)
       .catch(err => {
         if (err.status) {
           return res.status(err.status).json();
         }
         return res.status(400).json({ message: 'bad request' });
       });
+
     cache.setData('favorites', {...favorites}, 60*10);
     return res.json(favorites);
   }
