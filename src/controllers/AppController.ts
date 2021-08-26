@@ -17,7 +17,7 @@ class AppController {
     let appList: games[];
     try {
       const data = await axios.get('https://simple-api-selection.herokuapp.com/list-games/?title=black');
-      appList = data.data.applist;
+      appList = data.data.applist.apps;
       cache.setData('allApps', {...appList}, 60*10);
       
     } catch (err) {
